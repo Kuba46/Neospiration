@@ -9,7 +9,8 @@ services:
     volumes:
       - art_uploads:/app/Uploads
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   frontend:
     build: ArtSite.Frontend/Neospiration
@@ -26,6 +27,11 @@ services:
       - POSTGRES_DB=artsite
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
