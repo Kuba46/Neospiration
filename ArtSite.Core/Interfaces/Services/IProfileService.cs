@@ -11,9 +11,10 @@ public interface IProfileService
 
     Task<Profile> GetProfileByUserId(string userId);
 
-    Task<Profile> UpdateProfile(string userId, int profileId, string displayName);
+    Task<Profile> UpdateProfile(string userId, int profileId, string displayName, string description);
 
     Task UpdateAvatar(string userId, int profileId, IFileUploader fileUploader);
     Task DeleteAvatar(string userId, int profileId);
     Task<IFile> GetAvatar(int profileId);
+    Task<IEnumerable<Profile>> SearchProfilesByDisplayName(string query);
 }

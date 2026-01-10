@@ -100,5 +100,21 @@ public class SubscriptionService : ISubscriptionService
             throw new SubscriptionException.NotOwned();
         return await _subscriptionRepository.GetSubscriptions(profileId);
     }
-}
 
+    public async Task UnscribeAll(int tierId)
+    {
+        var tier = await _tierService.GetTier(tierId);
+        if (tier == null)
+            throw new TierException.NotFoundTier();
+        await _subscriptionRepository.DeleteAllSubscriptionsInTier(tierId);
+    }
+
+    public async Task Unsubscribe(string userId, int subscriptionId)
+    {
+        var profile = await _profileService.GetProfileByUserId(userId);
+        var subscription = await _subscriptionRepository.GetSubscription(subscriptionId);
+        if (subscription == null || subscription.ProfileId != profile.Id)
+            throw new SubscriptionException.NotFound();
+        await _subscriptionRepository.DeleteSubscription(subscriptionId);
+    }
+}

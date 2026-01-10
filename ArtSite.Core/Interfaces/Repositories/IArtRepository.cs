@@ -12,9 +12,13 @@ public interface IArtRepository
 
     Task<List<Art>> GetArts(int artistId);
 
-    Task<List<Art>> GetAllArtsWithPictures(int offset, int limit);
+    Task<Countable<Art>> GetAllArtsWithPictures(int offset, int limit);
 
     Task<List<Art>> GetAllArts(int offset, int limit);
 
     Task DeleteArt(int artId);
+
+    Task<Art> UpdateArt(Art art);
+
+    Task<List<Art>> GetArtsByTierId(int tierId);
 }

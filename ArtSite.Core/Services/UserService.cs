@@ -44,7 +44,7 @@ public class UserService : IUserService
         var result = await _userManager.CreateAsync(user, password);
         if (!result.Succeeded)
         {
-            throw new UserException(UserException.UserError.FieldError, result.Errors);
+            throw new UserException.FormErrorException(result.Errors);
         }
         var profile = await _profileRepository.CreateProfile(user.Id, displayName);
         return user;
@@ -139,25 +139,6 @@ public class UserService : IUserService
         {
             return null;
         }
-    }
-
-    public async Task UpdateProfile(string userId, int profileId, string displayName, string userName)
-    {
-        Profile? profile = await _profileRepository.GetProfile(profileId);
-        IdentityUser? user = await _userManager.FindByIdAsync(userId);
-        if (profile == null || profile.UserId != userId || user == null)
-        {
-            throw new UserException.NotAllowedException();
-        }
-
-        await _profileRepository.UpdateProfile(new Profile {
-            Id = profile.Id,
-            DisplayName = displayName,
-            UserId = profile.UserId
-        });
-
-        user.UserName = userName;
-        await _userManager.UpdateAsync(user);
     }
 
     public async Task UpdateUser(string userId, string userName)

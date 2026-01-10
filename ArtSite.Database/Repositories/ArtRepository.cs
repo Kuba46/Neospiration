@@ -44,16 +44,15 @@ public class ArtRepository : IArtRepository
             .ToListAsync();
     }
 
-    public async Task<List<Art>> GetAllArtsWithPictures(int offset, int limit)
+    public async Task<Countable<Art>> GetAllArtsWithPictures(int offset, int limit)
     {
-        return await _context.Arts
+        var request = _context.Arts
             .Include(art => art.Pictures)
             .Where(art => art.Pictures.Count > 0)
             .OrderByDescending(art => art.UploadedAt)
             .Select(art => art.ConvertToDto())
-            .Skip(offset)
-            .Take(limit)
-            .ToListAsync();
+            .Skip(offset);
+        return new Countable<Art> { Count = await request.CountAsync(), Items = await request.Take(limit).ToListAsync() };
     }
 
     public async Task<Art?> GetArt(int id)
@@ -63,6 +62,31 @@ public class ArtRepository : IArtRepository
 
     public async Task<List<Art>> GetArts(int artistId)
     {
-        return await _context.Arts.Where(art => art.ProfileId == artistId).Select(art => art.ConvertToDto()).ToListAsync();
+        return await _context.Arts.OrderByDescending(art => art.UploadedAt).Where(art => art.ProfileId == artistId).Select(art => art.ConvertToDto()).ToListAsync();
+    }
+
+    public async Task<List<Art>> GetArtsByTierId(int tierId)
+    {
+        return await _context.Arts
+            .Where(art => art.TierId == tierId)
+            .OrderByDescending(art => art.UploadedAt)
+            .Select(art => art.ConvertToDto())
+            .ToListAsync();
+    }
+
+    public async Task<Art> UpdateArt(Art art)
+    {
+        var dbArt = await _context.Arts.FindAsync(art.Id);
+        if (dbArt == null)
+            return art;
+
+        dbArt.Description = art.Description;
+        dbArt.TierId = art.TierId;
+        dbArt.UploadedAt = art.UploadedAt;
+
+        _context.Arts.Update(dbArt);
+        await _context.SaveChangesAsync();
+
+        return dbArt.ConvertToDto();
     }
 }

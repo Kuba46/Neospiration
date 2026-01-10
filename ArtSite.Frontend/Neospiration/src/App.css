@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+  --color-art-bg-dark: #25022A;
+  --color-art-bg-darker: #320425;
+  --color-art-primary: #6c2769;
+  --color-art-primary-hover: #7c3279;
+  --color-art-secondary: #6c2769;
+  --color-art-text-primary: rgba(255, 255, 255, 0.87);
+  --color-art-text-secondary: #CCCCCC;
+  --color-art-text-light: #C67DC7;
+  --color-art-text-hint: #A1A1A1;
+  --max-width: 1125px;
+  --font-rubik: 'Rubik', sans-serif;
+  --color-art-seperator: #3003260A;
+  --color-art-error: #551635;
+  --gradient-art-primary: linear-gradient(to bottom right, var(--color-art-bg-dark), var(--color-art-bg-darker));
+}
+
+.w-max-container {
+  max-width: var(--max-width);
+}
+
+.loader {
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #6c2769;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
