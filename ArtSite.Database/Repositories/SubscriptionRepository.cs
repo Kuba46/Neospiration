@@ -20,6 +20,25 @@ public class SubscriptionRepository(ApplicationDbContext _context) : ISubscripti
         return element.Entity.ConvertToDto();
     }
 
+    public async Task DeleteAllSubscriptionsInTier(int tierId)
+    {
+        var subscriptions = _context.Subscriptions
+            .Where(x => x.TierId == tierId);
+        _context.Subscriptions.RemoveRange(subscriptions);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteSubscription(int subscriptionId)
+    {
+        var subscription = await _context.Subscriptions
+            .FirstOrDefaultAsync(x => x.Id == subscriptionId);
+        if (subscription != null)
+        {
+            _context.Subscriptions.Remove(subscription);
+            await _context.SaveChangesAsync();
+        }
+    }
+
     public async Task<Subscription?> GetSubscription(int subscriptionId)
     {
         return await _context.Subscriptions

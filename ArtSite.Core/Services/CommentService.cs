@@ -49,7 +49,12 @@ public class CommentService : ICommentService
         return comment;
     }
 
-    public async Task<List<Comment>> GetComments(string? userId, int artId, int offset, int limit)
+    public Task<int> GetCommentCount(int artId)
+    {
+        return _commentRepository.GetCommentCount(artId);
+    }
+
+    public async Task<Countable<Comment>> GetComments(string? userId, int artId, int offset, int limit)
     {
         var art = await _artService.GetArt(userId, artId);
         return await _commentRepository.GetComments(art.Id, offset, limit);

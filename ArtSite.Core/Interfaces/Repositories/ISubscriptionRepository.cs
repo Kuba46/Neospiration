@@ -16,5 +16,8 @@ public interface ISubscriptionRepository
     Task<Subscription?> GetSubscription(int subscriptionId);
 
     Task<Subscription?> GetSubscriptionOfProfileIdInArtist(int profileId, int artistId);
-}
 
+    Task DeleteAllSubscriptionsInTier(int tierId);
+
+    Task DeleteSubscription(int subscriptionId);
+}

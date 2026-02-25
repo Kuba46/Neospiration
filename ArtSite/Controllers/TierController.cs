@@ -56,7 +56,7 @@ public class TierController : ControllerBase
         try
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-            await _tierService.DeleteTier(userId, tierId);
+            await _tierService.Apply(_subscriptionService).DeleteTier(userId, tierId);
             return Accepted();
         }
         catch (TierException.NotFoundTier e)
@@ -69,6 +69,13 @@ public class TierController : ControllerBase
         catch (TierException.NotOwnerTier)
         {
             return Forbid();
+        }
+        catch (TierException.HasChildTiers e)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Detail = e.Message
+            });
         }
         catch (Exception)
         {
@@ -194,6 +201,4 @@ public class TierController : ControllerBase
             throw;
         }
     }
-
 }
-

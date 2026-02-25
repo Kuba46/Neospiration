@@ -80,7 +80,7 @@ public class ProfileService : IProfileService
         await _profileRepository.UpdateProfile(profile);
     }
 
-    public async Task<Profile> UpdateProfile(string userId, int profileId, string displayName)
+    public async Task<Profile> UpdateProfile(string userId, int profileId, string displayName, string description)
     {
         Profile profile = await GetProfile(profileId);
         if (profile.UserId != userId)
@@ -88,7 +88,15 @@ public class ProfileService : IProfileService
             throw new ProfileException.NotOwnerProfile();
         }
         profile.DisplayName = displayName;
+        profile.Description = description;
         await _profileRepository.UpdateProfile(profile);
         return profile;
+    }
+
+    public async Task<IEnumerable<Profile>> SearchProfilesByDisplayName(string query)
+    {
+        if (string.IsNullOrEmpty(query) || query.Length < 1)
+            return new List<Profile>();
+        return await _profileRepository.SearchProfilesByDisplayName(query);
     }
 }

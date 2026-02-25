@@ -15,6 +15,7 @@ public class ArtService : IArtService
     private readonly IStorageService _storageService;
     private ITierService? _tierService = null;
     private ICommentService? _commentService = null;
+    private ILikeService? _likeService = null;
     private IView? _view = null;
     
     public ArtService(IArtRepository artRepository, IProfileService profileService, IStorageService storageService, IPictureRepository pictureRepository)
@@ -43,6 +44,12 @@ public class ArtService : IArtService
         return this;
     }
 
+    public IArtService Apply(ILikeService likeService)
+    {
+        _likeService = likeService;
+        return this;
+    }
+
     public async Task<Art> CreateArt(string userId, int profileId, string? description, int? tierId)
     {
         if (_tierService == null)
@@ -62,6 +69,8 @@ public class ArtService : IArtService
     {
         if (_commentService == null)
             throw new NotAppliedException("CommentService");
+        if (_likeService == null)
+            throw new NotAppliedException("LikeService");
         var profile = await _profileService.GetProfileByUserId(userId);
         var art = await _artRepository.GetArt(artId);
         if (art == null)
@@ -71,16 +80,17 @@ public class ArtService : IArtService
         var pictures = await _pictureRepository.GetPictures(art.Id);
         foreach (var picture in pictures)
         {
-            await _storageService.DeleteFile(userId, picture.StoragedFileId);
+            await _storageService.Apply(_profileService).DeleteFile(userId, picture.StoragedFileId);
             await _pictureRepository.DeletePicture(picture.Id);
         }
+        await _likeService.DeleteAllLikesInArt(art.Id);
         await _commentService.ForceDeleteAllComments(art.Id);
         await _artRepository.DeleteArt(art.Id);
     }
 
-    public async Task<List<Art>> GetAllArts(string userId, int offset, int limit)
+    public async Task<Countable<Art>> GetAllArts(string? userId, int offset, int limit)
     {
-        var profile = await _profileService.GetProfileByUserId(userId);
+        //var profile = await _profileService.GetProfileByUserId(userId);
         return await _artRepository.GetAllArtsWithPictures(offset, limit);
     }
 
@@ -105,9 +115,9 @@ public class ArtService : IArtService
         var picture = await _pictureRepository.GetPicture(pictureId);
         if (picture == null)
             throw new ArtException.NotFoundPicture();
-        var art = await GetArt(userId, picture.ArtId);
-        if (!await _view.CanView(userId, art))
-            throw new ArtException.UnauthorizedArtistAccess();
+        // var art = await GetArt(userId, picture.ArtId);
+        // if (!await _view.CanView(userId, art))
+        //     throw new ArtException.UnauthorizedArtistAccess();
         return picture;
     }
 

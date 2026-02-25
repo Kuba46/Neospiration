@@ -29,7 +29,8 @@ public class ProfileRepository(ApplicationDbContext context) : IProfileRepositor
         {
             DisplayName = displayName,
             UserId = userId,
-            Avatar = null
+            Avatar = null,
+            Description = "",
         });
         await context.SaveChangesAsync();
         return entry.Entity.ConvertToDto();
@@ -42,6 +43,7 @@ public class ProfileRepository(ApplicationDbContext context) : IProfileRepositor
             return;
         dbProfile.DisplayName = profile.DisplayName;
         dbProfile.Avatar = profile.Avatar;
+        dbProfile.Description = profile.Description;
         context.Profiles.Update(dbProfile);
         await context.SaveChangesAsync();
     }
@@ -54,5 +56,14 @@ public class ProfileRepository(ApplicationDbContext context) : IProfileRepositor
             context.Profiles.Remove(profile);
             await context.SaveChangesAsync();
         }
+    }
+
+    public async Task<IEnumerable<Profile>> SearchProfilesByDisplayName(string query)
+    {
+        return await context.Profiles
+            .Where(p => p.DisplayName.ToLower().Contains(query.ToLower()))
+            .Take(15)
+            .Select(p => p.ConvertToDto())
+            .ToListAsync();
     }
 }

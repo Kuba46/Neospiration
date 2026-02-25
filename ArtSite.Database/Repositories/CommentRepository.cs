@@ -46,15 +46,26 @@ public class CommentRepository(ApplicationDbContext context) : ICommentRepositor
             .FirstOrDefaultAsync(c => c.Id == id);
         return comment?.ConvertToDto();
     }
-    
-    public async Task<List<Comment>> GetComments(int artId, int offset, int limit)
+
+    public Task<int> GetCommentCount(int artId)
     {
-        var comments = await context.Comments
+        return context.Comments
+            .CountAsync(c => c.ArtId == artId);
+    }
+
+    public async Task<Countable<Comment>> GetComments(int artId, int offset, int limit)
+    {
+        var query = context.Comments
             .Where(c => c.ArtId == artId)
-            .OrderByDescending(c => c.UploadedAt)
+            .OrderByDescending(c => c.UploadedAt);
+    
+        var count = await query.CountAsync();
+        var items = await query
             .Skip(offset)
             .Take(limit)
+            .Select(c => c.ConvertToDto())
             .ToListAsync();
-        return comments.Select(c => c.ConvertToDto()).ToList();
+    
+        return new Countable<Comment> { Count = count, Items = items };
     }
 }
